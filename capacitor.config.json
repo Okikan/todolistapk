@@ -1,0 +1,8 @@
+{
+  "appId": "com.kanji.todolist",
+  "appName": "待办清单",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  }
+}

@@ -1,0 +1,234 @@
+/* ---------- 触屏 / 移动端适配 ---------- */
+/* 手机（<700px）：底部标签栏 + 悬浮新建按钮 + 底部抽屉 + 两行任务卡片 */
+body { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+button, .tab, .settings-btn, .cal-cell { touch-action: manipulation; }
+
+@media (max-width: 700px) {
+  /* ---- 顶栏：只留标题 ---- */
+  #app { flex-direction: column; }
+  #sidebar {
+    width: 100%;
+    flex: none;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: calc(10px + env(safe-area-inset-top)) 16px 10px;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+  .brand h1 { font-size: 16px; white-space: nowrap; }
+  .brand p { display: none; }
+  #sidebar footer { display: none; }
+
+  /* ---- 底部标签栏 ---- */
+  #view-tabs {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    z-index: 50;
+    flex-direction: row;
+    gap: 0;
+    background: var(--card);
+    border-top: 1px solid var(--border);
+    box-shadow: 0 -6px 20px rgba(20, 14, 50, 0.08);
+    padding: 5px 6px calc(6px + env(safe-area-inset-bottom));
+  }
+  .tab {
+    position: relative;
+    flex: 1;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+    padding: 7px 2px 6px;
+    border-radius: 12px;
+  }
+  .tab.active { box-shadow: none; }
+  .tab-main { flex-direction: column; gap: 1px; }
+  .tab-icon { font-size: 19px; line-height: 1.25; }
+  .tab-label { font-size: 10.5px; font-weight: 600; }
+  .tab .count {
+    position: absolute;
+    top: 1px;
+    right: calc(50% - 36px);
+    padding: 1px 6px;
+    font-size: 10px;
+  }
+
+  /* ---- 内容区：给底栏和 FAB 留空间 ---- */
+  #content { padding: 12px 14px calc(96px + env(safe-area-inset-bottom)); }
+  #content-head { margin-bottom: 10px; }
+  #view-title { font-size: 18px; }
+  #new-task-btn { display: none; }
+  #refresh-btn { width: 38px; height: 38px; font-size: 17px; border-radius: 11px; }
+
+  /* ---- 悬浮新建按钮（FAB） ---- */
+  .fab {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    right: 18px;
+    bottom: calc(74px + env(safe-area-inset-bottom));
+    width: 56px;
+    height: 56px;
+    border: none;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--primary-2));
+    color: #fff;
+    font-size: 26px;
+    line-height: 1;
+    cursor: pointer;
+    box-shadow: 0 10px 26px rgba(124, 108, 240, 0.5);
+    z-index: 60;
+    transition: transform 0.15s ease;
+  }
+  .fab:active { transform: scale(0.92); }
+
+  /* ---- 筛选栏：搜索 + 胶囊筛选条（不用原生下拉） ---- */
+  #filter-bar { flex-wrap: wrap; gap: 8px; }
+  #search-box { min-width: 100%; order: -1; padding: 11px 16px; font-size: 14px; }
+  #tag-select, #filter-select, #task-tag, #cal-tag-select { display: none; }
+  #task-tag-chips { display: flex; flex-wrap: wrap; overflow: visible; padding: 2px 0; }
+  .chip .tag-dot { width: 9px; height: 9px; }
+  #cal-tag-chips {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 0 2px 6px;
+    margin-bottom: 8px;
+    scrollbar-width: none;
+  }
+  #cal-tag-chips::-webkit-scrollbar { display: none; }
+  .chip-row {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 2px 2px 4px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .chip-row::-webkit-scrollbar { display: none; }
+  .chip {
+    flex: none;
+    border: 1.5px solid var(--input-border);
+    border-radius: 999px;
+    background: var(--card);
+    color: var(--text);
+    padding: 8px 15px;
+    font-size: 12.5px;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  }
+  .chip.selected {
+    background: linear-gradient(135deg, var(--primary), var(--primary-2));
+    border-color: transparent;
+    color: #fff;
+    font-weight: 600;
+  }
+
+  /* ---- 任务卡片：两行结构 + 大触控目标 ---- */
+  .todo-list { gap: 10px; }
+  .todo-item {
+    display: grid;
+    grid-template-columns: 34px 1fr;
+    gap: 4px 10px;
+    align-items: center;
+    padding: 12px 14px;
+    border-radius: 16px;
+  }
+  .check { grid-column: 1; grid-row: 1; width: 32px; height: 32px; font-size: 15px; }
+  .title { grid-column: 2; grid-row: 1; font-size: 15px; line-height: 1.4; }
+  .meta-row {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+  }
+  .meta-row:empty { display: none; }
+  .due, .tag-chip { font-size: 11.5px; padding: 3px 10px; }
+  .urge-badge { font-size: 11px; padding: 3px 9px; }
+  .note-icon { font-size: 15px; padding: 2px 4px; }
+  .grip { display: none; }
+  .todo-item.done .meta-row { opacity: 0.75; }
+
+  /* ---- 对话框 → 底部抽屉 ---- */
+  #modal-overlay { align-items: flex-end; }
+  #task-dialog {
+    width: 100%;
+    max-width: none;
+    max-height: 88vh;
+    border-radius: 20px 20px 0 0;
+    padding: 18px 18px calc(16px + env(safe-area-inset-bottom));
+    animation: sheet-up 0.2s ease;
+  }
+  #task-dialog h2 { font-size: 17px; }
+  #task-form label { font-size: 13.5px; margin: 14px 0 6px; }
+  #task-title, #task-due, #task-urge, #task-tag, #task-note { font-size: 15px; padding: 12px 14px; }
+  #task-due, #task-urge, #task-tag { height: 46px; }
+  .dialog-actions { margin-top: 18px; gap: 10px; }
+  #cancel-btn { flex: 1; padding: 13px; font-size: 15px; }
+  #submit-btn { flex: 2; padding: 13px; font-size: 15px; }
+
+  /* ---- 长按菜单 → 底部操作单 ---- */
+  #ctx-menu {
+    left: 0 !important;
+    right: 0;
+    bottom: 0;
+    top: auto !important;
+    width: 100%;
+    min-width: 0;
+    border-radius: 18px 18px 0 0;
+    padding: 10px 8px calc(10px + env(safe-area-inset-bottom));
+    box-shadow: 0 -12px 36px rgba(20, 14, 50, 0.3);
+    animation: sheet-up 0.18s ease;
+  }
+  #ctx-menu button {
+    width: 100%;
+    padding: 14px;
+    font-size: 16px;
+    text-align: center;
+    border-radius: 12px;
+  }
+  #ctx-menu button.danger { font-weight: 600; }
+
+  /* ---- 月历 ---- */
+  .cal-wrap { padding: 12px; }
+  .cal-title { font-size: 15px; }
+  .cal-nav { gap: 6px; }
+  .cal-nav button, #cal-tag-select { height: 34px; }
+  .cal-cell { min-height: 46px; padding: 3px 4px; gap: 2px; }
+  .cal-day-num { width: 20px; height: 20px; font-size: 11.5px; }
+  .cal-chip {
+    font-size: 9px;
+    padding: 1px 5px;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .cal-grid { gap: 3px; }
+  .cal-day-title { font-size: 13.5px; }
+
+  /* ---- 设置 ---- */
+  .settings-group { padding: 4px 14px 8px; }
+  .settings-row { gap: 10px; }
+  .settings-label span { font-size: 14px; }
+  .settings-label p { font-size: 11px; }
+  .settings-btn { padding: 10px 14px; font-size: 13px; }
+  .hotkey-btn { padding: 10px 14px; font-size: 13px; }
+  .trash-row { flex-wrap: wrap; }
+  .tag-add-row { flex-direction: column; align-items: stretch; }
+  .swatch { width: 24px; height: 24px; }
+  .trash-btn { padding: 8px 10px; font-size: 13px; }
+}
+
+@media (min-width: 701px) {
+  /* 平板 / 横屏：保持桌面布局，仅处理刘海安全区 */
+  #app { padding-top: env(safe-area-inset-top); }
+}
+
+@keyframes sheet-up {
+  from { transform: translateY(60%); opacity: 0; }
+}

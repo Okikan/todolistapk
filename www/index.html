@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#7c6cf0" />
+  <title>待办清单</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="mobile.css" />
+</head>
+<body>
+  <div id="app">
+    <aside id="sidebar">
+      <div class="brand">
+        <h1>📝 待办清单</h1>
+        <p id="summary">加载中…</p>
+      </div>
+      <nav id="view-tabs">
+        <button class="tab active" id="tab-active" type="button">
+          <span class="tab-main"><span class="tab-icon">📥</span><span class="tab-label">未完成</span></span><span class="count" id="count-active">0</span>
+        </button>
+        <button class="tab" id="tab-done" type="button">
+          <span class="tab-main"><span class="tab-icon">✅</span><span class="tab-label">已完成</span></span><span class="count" id="count-done">0</span>
+        </button>
+        <button class="tab" id="tab-calendar" type="button">
+          <span class="tab-main"><span class="tab-icon">📅</span><span class="tab-label">月历</span></span>
+        </button>
+        <button class="tab" id="tab-settings" type="button">
+          <span class="tab-main"><span class="tab-icon">⚙</span><span class="tab-label">设置</span></span>
+        </button>
+      </nav>
+      <footer id="sidebar-footer">右键 / 长按任务：编辑 · 完成 · 删除<br>未完成按截止时间自动排序，督促中的置顶</footer>
+    </aside>
+
+    <main id="content">
+      <div id="content-head">
+        <h2 id="view-title">未完成</h2>
+        <div id="head-actions">
+          <button id="refresh-btn" type="button" title="刷新列表，按当前时间重新检测截止时间">⟳</button>
+          <button id="new-task-btn" type="button">＋ 新建任务</button>
+        </div>
+      </div>
+
+      <div id="filter-bar">
+        <input id="search-box" type="search" placeholder="搜索任务关键词…" />
+        <select id="tag-select" title="按标签筛选">
+          <option value="">全部标签</option>
+        </select>
+        <select id="filter-select" title="按截止时间筛选（仅未完成视图）">
+          <option value="all">全部任务</option>
+          <option value="week">本周截止</option>
+          <option value="overdue">已逾期</option>
+          <option value="urge">督促中</option>
+        </select>
+        <div id="filter-chips" class="chip-row">
+          <button type="button" class="chip selected" data-mode="all">全部任务</button>
+          <button type="button" class="chip" data-mode="week">本周截止</button>
+          <button type="button" class="chip" data-mode="overdue">已逾期</button>
+          <button type="button" class="chip" data-mode="urge">督促中</button>
+        </div>
+        <div id="tag-chips" class="chip-row"></div>
+      </div>
+
+      <!-- 未完成视图 -->
+      <div id="active-view"></div>
+
+      <!-- 已完成视图（按年月分组） -->
+      <div id="done-view" class="hidden"></div>
+
+      <!-- 月历视图 -->
+      <div id="calendar-view" class="hidden">
+        <div class="cal-wrap">
+          <div class="cal-head">
+            <div class="cal-title" id="cal-title"></div>
+            <div class="cal-nav">
+              <select id="cal-tag-select" title="只看某个标签">
+                <option value="">全部标签</option>
+              </select>
+              <button id="cal-today" type="button" title="回到今天">今天</button>
+              <button id="cal-prev" type="button" title="上个月">‹</button>
+              <button id="cal-next" type="button" title="下个月">›</button>
+            </div>
+          </div>
+          <div id="cal-tag-chips" class="chip-row"></div>
+          <div id="cal-grid-box">
+            <div class="cal-grid" id="cal-grid"></div>
+          </div>
+        </div>
+        <div id="cal-day-panel" class="cal-day-panel hidden"></div>
+      </div>
+
+      <!-- 设置视图 -->
+      <div id="settings-view" class="hidden">
+        <div class="settings-panel">
+          <div class="settings-group">
+            <div class="settings-group-title">外观</div>
+            <div class="settings-row">
+              <div class="settings-label">
+                <span>深色模式</span>
+                <p>切换浅色 / 深色主题</p>
+              </div>
+              <button id="darkmode-switch" type="button" class="switch-row">
+                <span class="switch"><span class="knob"></span></span>
+              </button>
+            </div>
+          </div>
+          <div class="settings-group" id="hotkey-group">
+            <div class="settings-group-title">快捷键</div>
+            <div class="settings-row">
+              <div class="settings-label">
+                <span>新建任务</span>
+                <p>窗口获得焦点时按下即可弹出新建任务对话框</p>
+              </div>
+              <button id="hotkey-btn" type="button" class="hotkey-btn">Ctrl + N</button>
+            </div>
+            <p id="hotkey-hint" class="hotkey-hint hidden"></p>
+          </div>
+          <div class="settings-group">
+            <div class="settings-group-title">标签</div>
+            <div id="tag-list"></div>
+            <div class="tag-add-row">
+              <input id="new-tag-name" type="text" placeholder="新标签名称…" maxlength="12" />
+              <div id="tag-color-row" class="swatch-row"></div>
+              <button id="add-tag-btn" type="button" class="settings-btn">添加</button>
+            </div>
+          </div>
+          <div class="settings-group" id="backup-group">
+            <div class="settings-group-title">数据备份</div>
+            <div class="settings-row">
+              <div class="settings-label">
+                <span>导出 / 导入</span>
+                <p>导出全部任务为 JSON 文件；导入时自动跳过完全重复的任务</p>
+              </div>
+              <div class="settings-btns">
+                <button id="export-btn" type="button" class="settings-btn">导出</button>
+                <button id="import-btn" type="button" class="settings-btn">导入</button>
+              </div>
+            </div>
+          </div>
+          <div class="settings-group">
+            <div class="settings-group-title">回收站</div>
+            <div class="settings-row">
+              <div class="settings-label">
+                <span>回收站</span>
+                <p>删除的任务会保留最近 30 条，可恢复或彻底删除</p>
+              </div>
+              <div class="settings-btns">
+                <button id="clear-trash-btn" type="button" class="settings-btn danger-btn">清空回收站</button>
+              </div>
+            </div>
+            <div id="trash-list" class="trash-list"></div>
+          </div>
+          <div class="settings-group" id="system-group">
+            <div class="settings-group-title">系统</div>
+            <div class="settings-row">
+              <div class="settings-label">
+                <span>开机自启</span>
+                <p>开机后自动启动并隐藏到托盘</p>
+              </div>
+              <button id="autostart-switch" type="button" class="switch-row">
+                <span class="switch"><span class="knob"></span></span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- 新建 / 编辑任务对话框 -->
+  <div id="modal-overlay" class="hidden">
+    <div id="task-dialog" role="dialog" aria-labelledby="dialog-title">
+      <h2 id="dialog-title">新建任务</h2>
+      <form id="task-form" autocomplete="off" novalidate>
+        <label for="task-title">任务描述 <span class="required" title="必填">*</span></label>
+        <textarea id="task-title" rows="3" placeholder="要做什么？（Ctrl + Enter 快速创建）"></textarea>
+        <p id="title-error" class="field-error hidden">请填写任务描述</p>
+        <label for="task-tag">标签 <span class="optional">（选填）</span></label>
+        <select id="task-tag"></select>
+        <div id="task-tag-chips" class="chip-row"></div>
+        <label for="task-due">截止时间 <span class="optional">（选填）</span></label>
+        <input id="task-due" type="datetime-local" />
+        <label for="task-urge">督促时间 <span class="optional">（截止前多少天开始督促，默认 3 天）</span></label>
+        <input id="task-urge" type="number" min="0" max="365" step="1" value="3" disabled />
+        <label for="task-note">备注 <span class="optional">（选填）</span></label>
+        <textarea id="task-note" rows="2" placeholder="补充信息、链接、细节…"></textarea>
+        <div class="dialog-actions">
+          <button type="button" id="cancel-btn">取消</button>
+          <button type="submit" id="submit-btn">创建任务</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="ctx-menu" class="hidden"></div>
+  <button id="fab-new" class="fab" type="button" aria-label="新建任务">＋</button>
+  <script src="db.js"></script>
+  <script src="store.js"></script>
+  <script src="api.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>
